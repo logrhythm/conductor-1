@@ -14,10 +14,11 @@
 package conductor
 
 import (
-	"conductor/task"
 	"log"
 	"os"
 	"time"
+
+	"github.com/logrhythm/netflix-conductor/client/go/task"
 )
 
 var (
@@ -50,7 +51,7 @@ func (c *ConductorWorker) Execute(t *task.Task, executeFunction func(t *task.Tas
 	if err != nil {
 		log.Println("Error Executing task:", err.Error())
 		taskResult.Status = task.FAILED
-    taskResult.ReasonForIncompletion = err.Error()
+		taskResult.ReasonForIncompletion = err.Error()
 	}
 
 	taskResultJsonString, err := taskResult.ToJSONString()
@@ -65,7 +66,7 @@ func (c *ConductorWorker) Execute(t *task.Task, executeFunction func(t *task.Tas
 func (c *ConductorWorker) PollAndExecute(taskType string, executeFunction func(t *task.Task) (*task.TaskResult, error)) {
 	for {
 		time.Sleep(time.Duration(c.PollingInterval) * time.Millisecond)
-		
+
 		// Poll for Task taskType
 		polled, err := c.ConductorHttpClient.PollForTask(taskType, hostname)
 		if err != nil {
@@ -76,7 +77,7 @@ func (c *ConductorWorker) PollAndExecute(taskType string, executeFunction func(t
 			log.Println("No task found for:", taskType)
 			continue
 		}
-		
+
 		// Parse Http response into Task
 		parsedTask, err := task.ParseTask(polled)
 		if err != nil {
